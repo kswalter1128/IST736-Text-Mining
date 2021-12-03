@@ -1,0 +1,55 @@
+---
+title: "Homework 1"
+author: "Kyle Walter"
+date: "10/12/2021"
+output: html_document
+---
+
+# Introduction
+
+The purpose of this report is to complete a cursory overview of different sentiment analysis tools to see which one would likly work best for a client's social media application. Sentiment analysis is a technique that looks at written text by an individual and attempts to score it from a positive reaction through to a negative one.
+
+Sentiment analysis can be quite helpful identifying where a consumer has had an issue with a product and thus allow a business to quickly respond hopefully remedying the sitatuion. It also shows the larger audiences reading the responses that the company is out trying to make ammends thus hopefully persuading them to engage with the organization. Sentiment analysis can als be used to gage how the overall public is responding not just to products but politicians and other professionals placed the spotlight.
+
+Sentiment analysis can also be a bit of a tricky topic as subjectivity of what consitutes negative and positive can arise. Much work has been done within both the data science and lingusitc communities collectively to create dictionaries of words and their sentiment strengths. The various tools can either up play this work by providing a magnitude or downplay it by provide a meager positive or negative result. 
+
+That in itself is not highlighly unreasonable. A positive or negative tag helps a business quickly identify those individuals with which they need to have further discussion, while the magnitude may help a politician or product development group gage the reaction to a newly provided idea. 
+
+# Analysis and Models
+
+## About The Data
+
+For this exercise a data set of various Tweets was selected from Kaggle. This data contained 1.6 million Tweets gathered from the spring and summer time in 2009. The Tweets have been tagged with 0 for negative sentiment and 4 for positive sentiment. The documentation describing the data set indicates that a tag of 2 should indicate a neutral tweet. Using Python's Value Counts function, it was shown that there were know.
+
+Along with the tag the data set contains the date of the tweet, the id of the tweet from the twitter database, a flag field which all values were the same, the user, and for this task most importantly the tweet from the user.
+
+The preparation for the sentiment analysis was as follows. First the data was imported from the CSV file provide. Second the columns which were lacking a name were update per the documentation. Next the records were checked to see the tags and how many of each there were. As mentioned earlier, while the documentation for the set claims a tag of 2 there were none present in the data set. 
+
+Next using python's text here package the tweets were set to all lower case letters. Whitespace and Diacrities were removed from the text. The models were tested both with and without the punctuation removed. As the 2nd model had a higher result with the punctuation left the decision was made not to adjust the punctuation. With twitter data this can be a little touchy. Hashtags a commonly used to point users towards certain topics and these can be used in other analysis including twitters famous trending functions. In addition all user names are seen with an @ sign in front of them and utilized in tweets to send notification to the selected users. Stop words were left intact as the two models tested have means to discount their effect.
+
+As a last step for the ease of review, the tags were converted to a text form reading either 'neg' for negative, or 'pos' for positive.
+
+## The Models
+
+### Model 1
+
+For the first model a Naive Bayes classifier was trained on the text tags from the data set. Prior to initating the training, the first step was to take the cleaned data from the prior section and convert the text reviews into Term Frequency Inverted Document Frequency matrix.
+
+What this technique does is take each of the words in each review and score them by how frequent they show up in the review and penalizes them for showing up to frequently in other reviews. As mentioned in the exploration section, this would minimize the impact of the stop words on the model. For English, words like the, a, that, and so forth which provide structure to the sentence, but provide no real meaning, leaving words with strong emphasis and that happen less frequently with higher numbers for the model to learn.
+
+Additionally for this training, the decision was made to use cross fold validation instead of the holdout method to train the model. 10 folds were used for this analysis. Break the data in 90% and 10% remaining. The 90% was used to train the model and 10% to test. This process then repeats with another break of 90% and 10% till all 10 folds have been used to test the varying models. The model with best accuracy is retained and the average score of the 10 rounds is returned. This helps to provide a better idea how model will preform when introduced to unknown data.
+
+The model overall preformed with the 77% accuracy. Along with it's ability to correctly classify accurately at 80% for postive tags and 75% for negative tags and recall of prior seen data 73% and 82% respectively.
+
+This model learns from data has be classified previously and attempts to learn from the data set it is fed. It is limited in the ability to really grow beyond the classification tags that it is provided. There is a version in NLTK that provide features that are highly informative for the classification tags for which it is trying to compute. The model can be easily retrained using other data or new data in the future.
+
+### Model 2
+
+The second model chosen as a comparison is the vader sentiment classifier. Unlike Naive Bayes this model is based on a dictionary of words that have been classified by their level of sentiment. Negative, Neutral, and Positive words ranging from 0 to 1. 0 being the weakest possible sentiment in the category to 1 being the strongest.
+
+Per the documentation on Github, the three aforementioned scores are then aggregated to create a compound score for the sentence that expresses if the not only if the sentence is positive, negative, or neutral. It also describes how strongly the sentiment is expressed from 1 being the most positive to -1 being the most negative. The documentation also stresses that the range for neutral range greater than -.05 to less than .05 which is quite a tight range.
+
+The model itself works by pass the text through the model it returns the 4 scores in python as a dictionary. Once applied to the data frame, and lambda function was used to extract the compound value to its own column in the data frame and the bands from the documentation provided on Github used to calculate the predicted tab. Since the data only contain positive and negative tweets, the neutral band was ignored with the 0 to 1 representing a positive tweet and -1 to less than 0 representing a negative tweet.
+
+As this model uses a dictionary, no form of cross validation preformed as the text the would return the same value. There was however a noticeable drop in performance removing the punctuation from the tweets. Vader in the documentation says it is scoring sentences for their level polarity and this likely played into the response. A bit surprising given tweets have stream of conscious and informality to them. Along with the limited number of characters, fully formed sentences would not be an expected norm.
+
